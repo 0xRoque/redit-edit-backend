@@ -2,9 +2,9 @@
 
 Start server with `npm run dev`.
 
-TODO:
+TODhttps://github.com/0xRoque/redit-edit-backend.gitO:
 
-- [ ] install "mongodb"
+- [ ] install "mongodb" - check
 - [ ] initialize connection to mongodb
 - [ ] implement endpoint to create a subredit/community
 - [ ] implement endpoint to create a post (in a subredit)
