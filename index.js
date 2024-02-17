@@ -11,7 +11,7 @@ app.use(express.json());
 const url = process.env.DB_URL;
 const client = new MongoClient(url);
 
-// Nome do banco de dados
+// name do banco de dados
 const dbName = "roque-edit";
 
 // Usa a porta definida na variável de ambiente PORT, ou usa a porta 3000 por padrão
@@ -40,13 +40,13 @@ async function start(app) {
 // Endpoint para criar uma comunidade
 app.post("/comunidades", async (req, res) => {
   try {
-    const { nome, descricao } = req.body;
+    const { name, description } = req.body;
 
     // Verifica se todos os campos necessários foram fornecidos
-    if (!nome || !descricao) {
+    if (!name || !description) {
       return res
         .status(400)
-        .json({ mensagem: "Nome e descrição são obrigatórios" });
+        .json({ message: "name e descrição são obrigatórios" });
     }
 
     // Obtém uma referência à coleção "comunidades" no banco de dados
@@ -54,139 +54,139 @@ app.post("/comunidades", async (req, res) => {
 
     // Cria um novo documento para a comunidade
     const novaComunidade = {
-      nome,
-      descricao,
-      dataCriacao: new Date(),
+      name,
+      description,
+      creationDate: new Date(),
     };
 
     // Insere a nova comunidade no banco de dados
-    const resultado = await collection.insertOne(novaComunidade);
+    const result = await collection.insertOne(novaComunidade);
     s;
 
     res.status(201).json({
-      mensagem: "Comunidade criada com sucesso",
-      id: resultado.insertedId,
+      message: "Comunidade criada com sucesso",
+      id: result.insertedId,
     });
   } catch (error) {
     console.error("Erro ao criar a comunidade:", error);
-    res.status(500).json({ mensagem: "Erro ao criar a comunidade" });
+    res.status(500).json({ message: "Erro ao criar a comunidade" });
   }
 });
 
 // Endpoint para criar um post em uma comunidade
-app.post("/comunidades/:comunidadeId/posts", async (req, res) => {
+app.post("/comunidades/:communityId/posts", async (req, res) => {
   try {
-    const { comunidadeId } = req.params;
-    const { titulo, conteudo } = req.body;
+    const { communityId } = req.params;
+    const { title, content } = req.body;
 
     // Verifica se todos os campos necessários foram fornecidos
-    if (!titulo || !conteudo) {
+    if (!title || !content) {
       return res
         .status(400)
-        .json({ mensagem: "Título e conteúdo são obrigatórios" });
+        .json({ message: "Título e conteúdo são obrigatórios" });
     }
 
     // Obtém uma referência à coleção "posts" no banco de dados
     const collection = client.db(dbName).collection("posts");
 
     // Cria um novo documento para o post
-    const novoPost = {
-      comunidadeId,
-      titulo,
-      conteudo,
-      dataCriacao: new Date(),
+    const newPost = {
+      communityId,
+      title,
+      content,
+      creationDate: new Date(),
     };
 
     // Insere o novo post no banco de dados
-    const resultado = await collection.insertOne(novoPost);
+    const result = await collection.insertOne(newPost);
 
     res
       .status(201)
-      .json({ mensagem: "Post criado com sucesso", id: resultado.insertedId });
+      .json({ message: "Post criado com sucesso", id: result.insertedId });
   } catch (error) {
     console.error("Erro ao criar o post:", error);
-    res.status(500).json({ mensagem: "Erro ao criar o post" });
+    res.status(500).json({ message: "Erro ao criar o post" });
   }
 });
 
 // Endpoint para listar os posts de uma comunidade
-app.get("/comunidades/:comunidadeId/posts", async (req, res) => {
+app.get("/comunidades/:communityId/posts", async (req, res) => {
   try {
-    const { comunidadeId } = req.params;
+    const { communityId } = req.params;
 
     // Obtém uma referência à coleção "posts" no banco de dados
     const collection = client.db(dbName).collection("posts");
 
     // Encontra todos os posts da comunidade especificada
-    const posts = await collection.find({ comunidadeId }).toArray();
+    const posts = await collection.find({ communityId }).toArray();
 
     res.status(200).json(posts);
   } catch (error) {
     console.error("Erro ao obter os posts:", error);
-    res.status(500).json({ mensagem: "Erro ao obter os posts" });
+    res.status(500).json({ message: "Erro ao obter os posts" });
   }
 });
 
 // Endpoint para obter os comentários de um post
 app.get(
-  "/comunidades/:comunidadeId/posts/:postId/comentarios",
+  "/comunidades/:communityId/posts/:postId/comments",
   async (req, res) => {
     try {
-      const { comunidadeId, postId } = req.params;
+      const { communityId, postId } = req.params;
 
-      // Obtém uma referência à coleção "comentarios" no banco de dados
-      const collection = client.db(dbName).collection("comentarios");
+      // Obtém uma referência à coleção "comments" no banco de dados
+      const collection = client.db(dbName).collection("comments");
 
       // Encontra todos os comentários do post especificado
-      const comentarios = await collection.find({ postId }).toArray();
+      const comments = await collection.find({ postId }).toArray();
 
-      if (comentarios.length === 0) {
-        comentarios.push({
+      if (comments.length === 0) {
+        comments.push({
           postId: postId,
-          texto: "Fake post ne?",
+          texto: "Fake post?",
           autor: "Not me",
           date: new Date(),
         });
       }
 
-      res.status(200).json(comentarios);
+      res.status(200).json(comments);
     } catch (error) {
       console.error("Erro ao obter os comentários:", error);
-      res.status(500).json({ mensagem: "Erro ao obter os comentários" });
+      res.status(500).json({ message: "Erro ao obter os comentários" });
     }
   }
 );
 
 // Endpoint para editar um post
-app.put("/comunidades/:comunidadeId/posts/:postId", async (req, res) => {
+app.put("/comunidades/:communityId/posts/:postId", async (req, res) => {
   try {
-    const { comunidadeId, postId } = req.params;
-    const { titulo, conteudo } = req.body;
+    const { communityId, postId } = req.params;
+    const { title, content } = req.body;
 
     // Verifica se todos os campos necessários foram fornecidos
-    if (!titulo || !conteudo) {
+    if (!title || !content) {
       return res
         .status(400)
-        .json({ mensagem: "Título e conteúdo são obrigatórios" });
+        .json({ message: "Título e conteúdo são obrigatórios" });
     }
 
     // Obtém uma referência à coleção "posts" no banco de dados
     const collection = client.db(dbName).collection("posts");
 
     // Atualiza o post no banco de dados
-    const resultado = await collection.updateOne(
-      { _id: postId, comunidadeId },
-      { $set: { titulo, conteudo } }
+    const result = await collection.updateOne(
+      { _id: postId, communityId },
+      { $set: { title, content } } //
     );
 
-    if (resultado.modifiedCount === 0) {
-      return res.status(404).json({ mensagem: "Post não encontrado" });
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ message: "Post não encontrado" });
     }
 
-    res.status(200).json({ mensagem: "Post editado com sucesso" });
+    res.status(200).json({ message: "Post editado com sucesso" });
   } catch (error) {
     console.error("Erro ao editar o post:", error);
-    res.status(500).json({ mensagem: "Erro ao editar o post" });
+    res.status(500).json({ message: "Erro ao editar o post" });
   }
 });
 // fim dos endpoints
